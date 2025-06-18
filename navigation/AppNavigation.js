@@ -1,21 +1,36 @@
-import { View, Text } from 'react-native'
-import React from 'react'
-import { createStaticNavigation, NavigationContainer } from '@react-navigation/native';
+import React from 'react';
+import { ClerkProvider, useAuth } from '@clerk/clerk-expo';
+import { tokenCache } from '@clerk/clerk-expo/token-cache';
+import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import HomeScreen from '../screens/HomeScreen';
-const Stack= createNativeStackNavigator();
+import WelcomeScreen from '../screens/WelcomeScreen';
+
+const Stack = createNativeStackNavigator();
+
+function RootNavigation() {
+  const { isSignedIn } = useAuth();
+
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      {isSignedIn ? (
+        <Stack.Screen name="Home" component={HomeScreen} />
+      ) : (
+        <Stack.Screen name="Welcome" component={WelcomeScreen} />
+      )}
+    </Stack.Navigator>
+  );
+}
 
 export default function AppNavigation() {
   return (
-    <NavigationContainer>
-        <Stack.Navigator
-        screenOptions={{
-            headerShown:false
-        }}
-        >
-            <Stack.Screen name='Home' component={HomeScreen}/>
-        </Stack.Navigator>
-    </NavigationContainer>
-   
-  )
+    <ClerkProvider
+      tokenCache={tokenCache}
+      publishableKey="pk_test_Y2FsbS1ob25leWJlZS04NS5jbGVyay5hY2NvdW50cy5kZXYk"
+    >
+      <NavigationContainer>
+        <RootNavigation />
+      </NavigationContainer>
+    </ClerkProvider>
+  );
 }
